@@ -10,16 +10,19 @@ import {
   ListItemText,
   OutlinedInput,
   Paper,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 // const Categorie = [
 //   { id: 1, name: "drinks", hide: true },
@@ -29,11 +32,40 @@ import axios from "axios";
 export default function MangeCat() {
   const [open, setOpen] = useState(false);
   const [openUpdate, stOpenUpdate] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadingAdd, setLoadingAdd] = useState(false);
+  const [loadingUpdate,setLoadingUpdate] =  useState(false)
+  const [updatestatusID,SetupdatestatusID] =  useState(null)
   const [error, setError] = useState("");
   const [Categorie, setCategorie] = useState([]);
   const [newCategorie, setNewCategorie] = useState("");
+   const [openSnack, setOpenSnack] = useState(false);
+  const [message, setMessage] = useState("");
+  const handleClickSnack = () => {
+    setOpenSnack(true);
+  };
+
+  const handleCloseSnack = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnack(false);
+  };
+  const action = (
+    <React.Fragment>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={handleCloseSnack}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </React.Fragment>
+  );
   const getCategories = async () => {
+    setLoading(true)
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token");
@@ -58,6 +90,7 @@ export default function MangeCat() {
   }, []);
   const handelAddCategories = async () => {
     const token = localStorage.getItem("token");
+    setLoadingAdd(true)
     try {
       await axios.post(
         import.meta.env.VITE_API_URL + "/categories/insertCategorie",
@@ -68,15 +101,19 @@ export default function MangeCat() {
           },
         }
       );
+      handleClickSnack();
+      setMessage("Categorie added successfully!");
+      setOpen(false);
       getCategories();
     } catch (error) {
       setError("Failed to add category");
     } finally {
-      setLoading(false);
+      setLoadingAdd(false);
     }
   };
   const handelUpdate = async (id, name) => {
     const token = localStorage.getItem("token");
+    setLoadingUpdate(true)
     try {
       const res = await axios.put(
           `${import.meta.env.VITE_API_URL}/categories/update/${id}`,
@@ -88,13 +125,19 @@ export default function MangeCat() {
         }
       );
       getCategories();
+      handleClickSnack();
+      setMessage("Categorie Update successfully!");
       console.log(res.data);
+       stOpenUpdate(false);
     } catch (error) {
       console.log(error);
+    }finally{
+      setLoadingUpdate(false)
     }
   };
   const handelupdateStatus = async (id, status) => {
     const token = localStorage.getItem("token");
+    SetupdatestatusID(id)
     try {
       const res = await axios.put(
           `${import.meta.env.VITE_API_URL}/categories/update-status/${id}`,
@@ -106,16 +149,22 @@ export default function MangeCat() {
         }
       );
       getCategories();
+      handleClickSnack();
+      setMessage("Categorie Updated Status successfully!");
       console.log(res.data);
     } catch (error) {
       console.log(error);
+    } finally{
+      SetupdatestatusID(null)
     }
   };
   const deleteCategoire = async (id) => {
     const isConfirmed = window.confirm(
       "Are you sure you want to delete this Categorie?"
     );
+    
     if (!isConfirmed) return;
+    setLoading(true)
     const token = localStorage.getItem("token");
     try {
       const res = await axios.delete(
@@ -127,14 +176,25 @@ export default function MangeCat() {
         }
       );
       getCategories();
+      handleClickSnack();
+      setMessage("Categorie added successfully!");
       // console.log(res.data);
     } catch (error) {
       console.log(error);
+    }finally{
+      setLoading(false)
     }
   };
   const [selectedId, setSelectedId] = useState("");
+   if (loading) {
+    return (
+      <Box sx={{textAlign:"center"}}>
+        <CircularProgress size={30} />
+      </Box>
+    );
+  }
   return (
-    <Box>
+    <Box sx={{height:"100vh"}}>
       <Box
         sx={{
           display: "flex",
@@ -179,6 +239,7 @@ export default function MangeCat() {
           <TextField
             fullWidth
             placeholder="New Categorie"
+            required
             onChange={(e) => setNewCategorie(e.target.value)}
             sx={{
               "& .MuiInputBase-root": {
@@ -194,12 +255,13 @@ export default function MangeCat() {
             <Button
               variant="contained"
               sx={{ height: { xm: 30, md: 50 }, borderRadius: 2 }}
+              disabled={loadingAdd}
               onClick={() => {
-                setOpen(false);
+                
                 handelAddCategories();
               }}
             >
-              Add
+              {loadingAdd ? <CircularProgress size={20} color="inherit"/> : "Add"}
             </Button>
             <Button
               variant="contained"
@@ -252,11 +314,13 @@ export default function MangeCat() {
               variant="contained"
               sx={{ height: { xm: 30, md: 50 }, borderRadius: 2 }}
               onClick={() => {
-                stOpenUpdate(false);
+               
                 handelUpdate(selectedId, newCategorie);
+
               }}
             >
-              Update
+              {loadingUpdate ? <CircularProgress size={20} color="inherit"/> : "Update"}
+              
             </Button>
             <Button
               variant="contained"
@@ -309,7 +373,7 @@ export default function MangeCat() {
               <Typography>{item.name}</Typography>
               <Box>
                 <IconButton  onClick={()=>{handelupdateStatus(item._id,!item.isActive)}}>
-                  {!item.isActive ? (
+                  {updatestatusID === item._id ? <CircularProgress size={20} color="inherit"/> : !item.isActive ? (
                     <VisibilityOffOutlinedIcon />
                   ) : (
                     <VisibilityIcon />
@@ -333,6 +397,14 @@ export default function MangeCat() {
           );
         })}
       </Paper>
+      <Snackbar
+              open={openSnack}
+              autoHideDuration={6000}
+              onClose={handleCloseSnack}
+              message={message}
+              action={action}
+              
+            />
     </Box>
   );
 }

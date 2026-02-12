@@ -9,6 +9,7 @@ const drawerWidth = 240;
 export default function TopBar({ onDrawerToggle ,name }) {
   return (
     <AppBar
+
       position="fixed"
       sx={{
         width: { sm: `calc(100% - ${drawerWidth}px)` },
@@ -16,10 +17,12 @@ export default function TopBar({ onDrawerToggle ,name }) {
         bgcolor:"#fff",
         color:"#000",
         boxShadow:"none",
-        borderBottom:"1px solid #E0E0E0"
+        borderBottom:"1px solid #E0E0E0",
+        display:{xs:"block",md:"none"}
+        
       }}
     >
-      <Toolbar >
+      <Toolbar sx={{ minHeight: 0 }}>
   
         <IconButton
           color="inherit"

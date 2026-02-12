@@ -23,6 +23,8 @@ import CreateBussnise from "./Componets/dachboard/CreateBussninse.jsx";
 import Npending from "./Componets/dachboard/Npending.jsx";
 import Rejected from "./Componets/dachboard/REJECTED.jsx";
 import PaymentManagment from "./Componets/AdminDachborad/page/Paymangemnt.jsx";
+import Subscription from "./Componets/dachboard/DachbordPage/Subscription.jsx";
+import Profile from "./Componets/dachboard/DachbordPage/Profile.jsx";
 const router = createBrowserRouter(
   // createRoutesFromElements(
 
@@ -78,6 +80,8 @@ const router = createBrowserRouter(
         { path: "general", element: <General /> },
         { path: "mangecategory", element: <MangeCat /> },
         { path: "mangeproduct", element: <MangeProduct /> },
+        {path:"Subscription",element:<Subscription/>},
+        {path:"profile",element:<Profile/>}
       ],
     },
     {

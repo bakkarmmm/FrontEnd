@@ -89,12 +89,13 @@ export default function PaymentManagment() {
   const [status, setStatus] = useState("all");
   const [paymants, setPayments] = useState([]);
   const [sum, setsum] = useState(0);
-  const calculationOfpaymanets = () => {
-    const Total = paymants.reduce((acc, item) => {
-      return acc + (item.subsId?.paidAmount || 0);
-    }, 0);
-    setsum(Total);
-  };
+  const calculationOfApprovedPayments = () => {
+  const Total = paymants
+    .filter(item => item.status === "APPROVED") // فقط المعتمدة
+    .reduce((acc, item) => acc + (item.subsId?.paidAmount || 0), 0);
+
+  setsum(Total);
+};
   const paymaentPending = paymants.filter((item) => item.status === "PENDING" && item.type === "RENEW");
   const getPayments = async () => {
     const token = localStorage.getItem("token");
@@ -114,20 +115,41 @@ export default function PaymentManagment() {
       console.log(error);
     }
   };
-  const handaleAccepted = async()=>{
+  const handaleAccepted = async(bussninsId,Payid,subsId)=>{
     const token = localStorage.getItem("token");
     try {
       if (!token) throw new Error("No token");
       const res = await axios.put(
-        import.meta.env.VITE_API_URL + "/paymantes/allPaymants",
+        import.meta.env.VITE_API_URL + "/paymantes/acceptedPaymant",{bussninsId,Payid,subsId},
         {   
           headers: {
             Authorization: `Bearer ${token}`,
           },
         },
       );
-      setPayments(res.data);
-      console.log(paymants);
+      getPayments();
+      
+    } catch (error) {
+      console.log(error);
+    }
+  }
+   const handaleRejected = async(bussninsId,Payid,subsId)=>{
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this BUSSNINSE?",
+    );
+    if (!isConfirmed) return;
+    const token = localStorage.getItem("token");
+    try {
+      if (!token) throw new Error("No token");
+      const res = await axios.put(
+        import.meta.env.VITE_API_URL + "/paymantes/rejectedPaymant",{bussninsId,Payid,subsId},
+        {   
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      getPayments();
     } catch (error) {
       console.log(error);
     }
@@ -137,9 +159,9 @@ export default function PaymentManagment() {
   }, []);
 
   useEffect(() => {
-    calculationOfpaymanets();
+    calculationOfApprovedPayments();
   }, [paymants]);
-  console.log(paymants);
+  console.log(paymants)
   return (
     <Box>
       <Box>
@@ -362,6 +384,9 @@ export default function PaymentManagment() {
                       m: 1,
                       px: 2,
                     }}
+                    onClick={()=>{
+                      handaleAccepted(pay.bussninsId?._id,pay._id,pay.subsId?._id)
+                    }}
                   >
                     Approve
                   </Button>
@@ -374,6 +399,9 @@ export default function PaymentManagment() {
                       borderRadius: 2,
                       m: 1,
                       px: 2,
+                    }}
+                    onClick={()=>{
+                      handaleRejected(pay.bussninsId?._id,pay._id,pay.subsId?._id)
                     }}
                   >
                     Reject

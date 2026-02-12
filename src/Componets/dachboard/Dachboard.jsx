@@ -10,10 +10,10 @@ import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import { colors } from "@mui/material";
 const drawerWidth = 240;
-
 
 const DachboardMenu = [
   {
@@ -24,8 +24,14 @@ const DachboardMenu = [
   },
   { id: 2, name: "Categoris", icon: <CategoryIcon />, path: "mangecategory" },
   { id: 3, name: "Products", icon: <Inventory2Icon />, path: "mangeproduct" },
-  { id: 4, name: "Orders", icon: <ReceiptLongIcon />, path: "cart" },
-  { id: 7, name: "Log Out", icon: <LogoutOutlinedIcon />, path: "/" },
+  {
+    id: 4,
+    name: "Subscription",
+    icon: <ReceiptLongIcon />,
+    path: "Subscription",
+  },
+  { id: 7, name: "Profile", icon: <ManageAccountsIcon />, path: "profile" },
+  { id: 13, name: "Log Out", icon: <LogoutOutlinedIcon />, path: "/" },
 ];
 export default function Dachboard() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -45,9 +51,9 @@ export default function Dachboard() {
       setMobileOpen(!mobileOpen);
     }
   };
-  
+
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex",bgcolor:"#F9FAFB" }}>
       <CssBaseline />
       <TopBar onDrawerToggle={handleDrawerToggle} name="Your Dachboard" />
       <LeftBar
@@ -61,12 +67,16 @@ export default function Dachboard() {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },overflowX: "hidden"
-          
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          overflowX: "hidden",
+         
         }}
       >
-        <Toolbar />
-        <Outlet/>
+        {/* <Toolbar /> */}
+        <Box sx={{ display: { xs: "block", md: "none" }}}>
+          <Toolbar sx={{ minHeight: 48 }} />
+        </Box>
+        <Outlet />
       </Box>
     </Box>
   );

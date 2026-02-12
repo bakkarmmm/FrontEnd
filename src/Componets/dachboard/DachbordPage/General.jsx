@@ -7,18 +7,47 @@ import {
   MenuItem,
   Paper,
   Select,
+  Snackbar,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
-import { useEffect, useState } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 export default function General() {
   const [data, setData] = useState([]);
   const [types, setTypes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
   const [error, setError] = useState("");
+  const [openSnack, setOpenSnack] = useState(false);
+  const [message, setMessage] = useState("");
+  const handleClickSnack = () => {
+    setOpenSnack(true);
+  };
+
+  const handleCloseSnack = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnack(false);
+  };
+  const action = (
+    <React.Fragment>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={handleCloseSnack}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </React.Fragment>
+  );
   const [formData, setFormData] = useState({
     name: "",
     type: "",
@@ -29,6 +58,7 @@ export default function General() {
 
   useEffect(() => {
     const getMyBussnises = async () => {
+      setLoading(true)
       try {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No token");
@@ -62,7 +92,7 @@ export default function General() {
   }, []);
   const handleSubmit = async (e) => {
     e.preventDefault(); // يمنع reload
-
+    setLoadingSave(true)
     try {
       const token = localStorage.getItem("token");
       const re = await axios.put(
@@ -76,14 +106,25 @@ export default function General() {
       );
       console.log(formData);
       console.log(re.data);
-      alert("تم الحفظ بنجاح ✅");
+      handleClickSnack();
+      setMessage("Updated Infomartion successfully!");
     } catch (err) {
       console.error(err);
       alert("خطأ أثناء الحفظ ❌");
+    }finally{
+      setLoadingSave(false);
+      
     }
   };
+   if (loading) {
+    return (
+      <Box sx={{textAlign:"center"}}>
+        <CircularProgress size={30} />
+      </Box>
+    );
+  }
   return (
-    <Box direction={"column"}>
+    <Box direction={"column"} sx={{height:"100vh"}}>
       <Typography sx={{ fontWeight: "bold" }} variant="h5">
         Store Settings
       </Typography>
@@ -99,8 +140,10 @@ export default function General() {
               mx: "auto",
               mt: 5,
               p: 3,
-              boxShadow: 3,
+              boxShadow: 1 ,
+              
               borderRadius: 2,
+              bgcolor:"white"
             }}
           >
             <TextField
@@ -187,14 +230,24 @@ export default function General() {
                 type="submit"
                 variant="contained"
                 onClick={handleSubmit}
+                disabled={loadingSave}
                 startIcon={<SaveOutlinedIcon />}
               >
-                Save Change
+                {loadingSave ? <CircularProgress size={20} color="inherit"/> : " Save Change"}
+               
               </Button>
             </Box>
           </Box>
         );
       })}
+      <Snackbar
+              open={openSnack}
+              autoHideDuration={6000}
+              onClose={handleCloseSnack}
+              message={message}
+              action={action}
+             
+            />
     </Box>
   );
 }

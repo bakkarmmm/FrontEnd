@@ -10,8 +10,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import CircularProgress from "@mui/material/CircularProgress";
+import { SaveAltOutlined } from "@mui/icons-material";
 export default function Form({
   handleSubmit,
   setProductName,
@@ -28,6 +31,7 @@ export default function Form({
   productname,
   productprice,
   productDisc,
+  saving
 }) {
    
   return (
@@ -187,16 +191,22 @@ export default function Form({
           variant="contained"
           sx={{ borderRadius: 2, m: 1 }}
           onClick={() => {
-            setOpen(false);
+            
           }}
+          disabled={saving}
+          startIcon={saving ? <CircularProgress size={20}/> : <SaveAltOutlined/>}
         >
-          {mode === "add"? "Add": "Update" }
+          {saving ? "Saving ... ": mode === "add"? "Add": "Update" }
+           
         </Button>
         <Button
           variant="contained"
           sx={{ borderRadius: 2, m: 1 }}
           onClick={() => {
             setOpen(false);
+            setPrice("");
+      setDsic("");
+      (setproductCategorie(""), setProductName(""), setImage(""));
           }}
         >
           Cancle
